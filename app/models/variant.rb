@@ -3,6 +3,7 @@ class Variant < ActiveRecord::Base
   belongs_to :product
 
   has_many :variant_assets, dependent: :destroy
+  has_many :inventory_unit, dependent: :destroy
 
   store :properties, coder: JSON
 

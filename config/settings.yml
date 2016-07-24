@@ -1,3 +1,7 @@
 roles:
   admin: "Admin"
   customer: "Customer"
+inventory:
+  status:
+    free: "available"
+    lock: "lock"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160724035210) do
+ActiveRecord::Schema.define(version: 20160724043052) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -36,6 +36,14 @@ ActiveRecord::Schema.define(version: 20160724035210) do
     t.string   "symbol",     null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "inventory_units", force: :cascade do |t|
+    t.string   "status",     default: "available", null: false
+    t.integer  "variant_id",                       null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.index ["variant_id"], name: "index_inventory_units_on_variant_id"
   end
 
   create_table "products", force: :cascade do |t|
