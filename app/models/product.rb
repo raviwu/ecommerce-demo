@@ -1,5 +1,6 @@
 class Product < ActiveRecord::Base
   belongs_to :classification
+  has_many :variants, dependent: :destroy
 
   store :properties, coder: JSON
 
