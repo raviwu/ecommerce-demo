@@ -6,7 +6,7 @@ RSpec.describe Variant, type: :model do
   it { should belong_to(:currency) }
   it { should belong_to(:product) }
   it { should have_many(:variant_assets).dependent(:destroy) }
-  it { should have_many(:inventory_unit).dependent(:destroy) }
+  it { should have_many(:inventory_units).dependent(:destroy) }
   it { should validate_presence_of(:price) }
   it { should validate_presence_of(:currency) }
   it { should validate_presence_of(:product) }
@@ -43,6 +43,22 @@ RSpec.describe Variant, type: :model do
         }
       )
       expect(variant.valid?).to eq(true)
+    end
+  end
+
+  describe "update_stock_item_count before save" do
+    let!(:variant) { create(:variant) }
+
+    it "initialize the stock_item_count to 0" do
+      expect(variant.stock_item_count).to eq(0)
+    end
+
+    it "counts the free to order inventory_units and cache to stock_item_count" do
+      create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
+      create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
+      create(:inventory_unit, variant: variant, status: Settings.inventory.status.lock)
+      variant.save
+      expect(variant.stock_item_count).to eq(2)
     end
   end
 end
