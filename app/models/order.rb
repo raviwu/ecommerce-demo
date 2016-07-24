@@ -1,7 +1,7 @@
 class Order < ActiveRecord::Base
   belongs_to :user
   belongs_to :currency
-  belongs_to :shipment
+  belongs_to :shipment, optional: true
 
   # User can have many payments for an order, keep
   # record the pass / failed attempts of payment history

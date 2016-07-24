@@ -1,0 +1,8 @@
+- @orders.each do |order|
+  .well
+    = link_to "View Detail", admin_order_path(order), class: "btn btn-primary pull-right"
+    %ul
+      %li= "Order No. #{order.order_number}"
+      %li= "Price: #{order.currency.name} #{order.currency.symbol}#{order.line_item_total}"
+      %li= "Discount Price: #{order.currency.name} #{order.currency.symbol}#{order.promo_total}"
+      %li= "Status: #{order.status}"

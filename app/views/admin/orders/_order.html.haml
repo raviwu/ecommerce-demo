@@ -1,0 +1,16 @@
+.well
+  %ul
+    %li= "Order No. #{order.order_number}"
+    %li
+      Billling Contact Info
+      %ul
+        - order.billing_contact_info.each_pair do |k, v|
+          %li= "#{k}: #{v}"
+    %li
+      Shipping Contact Info
+      %ul
+        - order.shipping_contact_info.each_pair do |k, v|
+          %li= "#{k}: #{v}"
+    %li= "Price: #{order.currency.name} #{order.currency.symbol}#{order.line_item_total}"
+    %li= "Discount Price: #{order.currency.name} #{order.currency.symbol}#{order.promo_total}"
+    %li= "Status: #{order.status}"
