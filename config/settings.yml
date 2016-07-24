@@ -15,6 +15,7 @@ shipment:
     fami_port: "全家超商取貨"
 order:
   status:
+    shopping: "購物中"
     payment_pending: "待付款"
     packing: "包裝中"
     delivered: "已寄出"
