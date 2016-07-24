@@ -1,4 +1,5 @@
 roles:
+  all: ["Admin", "Customer"]
   admin: "Admin"
   customer: "Customer"
 inventory:
