@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160724043052) do
+ActiveRecord::Schema.define(version: 20160724050158) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -46,6 +46,24 @@ ActiveRecord::Schema.define(version: 20160724043052) do
     t.index ["variant_id"], name: "index_inventory_units_on_variant_id"
   end
 
+  create_table "orders", force: :cascade do |t|
+    t.string   "order_number",                      null: false
+    t.integer  "user_id",                           null: false
+    t.text     "billing_contact_info",              null: false
+    t.text     "shipping_contact_info",             null: false
+    t.integer  "currency_id",                       null: false
+    t.integer  "shipment_id"
+    t.integer  "line_item_total",       default: 0, null: false
+    t.integer  "promo_total",           default: 0, null: false
+    t.string   "status",                            null: false
+    t.datetime "completed_at"
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
+    t.index ["currency_id"], name: "index_orders_on_currency_id"
+    t.index ["shipment_id"], name: "index_orders_on_shipment_id"
+    t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.string   "name",              null: false
     t.string   "description"
@@ -64,6 +82,19 @@ ActiveRecord::Schema.define(version: 20160724043052) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "shipments", force: :cascade do |t|
+    t.string   "logistics_number", null: false
+    t.integer  "user_id",          null: false
+    t.integer  "handle_staff_id",  null: false
+    t.string   "shipment_method",  null: false
+    t.string   "status",           null: false
+    t.datetime "delivered_at"
+    t.datetime "arrived_at"
+    t.datetime "created_at",       null: false
+    t.datetime "updated_at",       null: false
+    t.index ["user_id"], name: "index_shipments_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string   "email",           null: false
     t.string   "name",            null: false
@@ -78,10 +109,10 @@ ActiveRecord::Schema.define(version: 20160724043052) do
   create_table "variant_assets", force: :cascade do |t|
     t.string   "description"
     t.integer  "position"
-    t.string   "attachment_file_name"
-    t.string   "attachment_content_type"
-    t.integer  "attachment_file_size"
-    t.datetime "attachment_updated_at"
+    t.string   "attachment_file_name",    null: false
+    t.string   "attachment_content_type", null: false
+    t.integer  "attachment_file_size",    null: false
+    t.datetime "attachment_updated_at",   null: false
     t.integer  "variant_id",              null: false
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false

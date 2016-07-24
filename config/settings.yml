@@ -5,3 +5,17 @@ inventory:
   status:
     free: "available"
     lock: "lock"
+shipment:
+  status:
+    packing: "包裝"
+    delivered: "寄出"
+    received: "已收貨"
+  method:
+    post: "郵局便利袋"
+    fami_port: "全家超商取貨"
+order:
+  status:
+    payment_pending: "待付款"
+    packing: "包裝中"
+    delivered: "已寄出"
+    received: "已送達"
