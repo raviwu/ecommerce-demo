@@ -9,4 +9,8 @@ class User < ActiveRecord::Base
 
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :role, presence: true
+
+  def admin?
+    role.name == Settings.roles.admin
+  end
 end

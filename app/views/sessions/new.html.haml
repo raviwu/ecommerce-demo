@@ -1,0 +1,17 @@
+%h3
+  Login
+%hr
+= form_tag login_path, class: "col-lg-6 col-sm-12" do
+  .form-group
+    %label.sr-only{:for => "Username"} Amount (in dollars)
+    .input-group
+      .input-group-addon
+        = fa_icon "user"
+      = text_field_tag :email, nil, class: "form-control", placeholder: "email"
+  .form-group
+    %label.sr-only{:for => "Password"} Amount (in dollars)
+    .input-group
+      .input-group-addon
+        = fa_icon "key"
+      = password_field_tag :password, nil, class: "form-control"
+  = button_tag "Login", class: "btn btn-primary"
