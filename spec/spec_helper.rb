@@ -108,4 +108,9 @@ RSpec.configure do |config|
   config.after(:each) do
     DatabaseCleaner.clean
   end
+
+  # Make sure deleted paperclip generated files during integration tests.
+  config.after(:suite) do
+    FileUtils.rm_rf(Dir["#{Rails.root}/tmp/spec/test_files/"])
+  end
 end

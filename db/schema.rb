@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160724033857) do
+ActiveRecord::Schema.define(version: 20160724035210) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -65,6 +65,19 @@ ActiveRecord::Schema.define(version: 20160724033857) do
     t.datetime "updated_at",      null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
+  end
+
+  create_table "variant_assets", force: :cascade do |t|
+    t.string   "description"
+    t.integer  "position"
+    t.string   "attachment_file_name"
+    t.string   "attachment_content_type"
+    t.integer  "attachment_file_size"
+    t.datetime "attachment_updated_at"
+    t.integer  "variant_id",              null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+    t.index ["variant_id"], name: "index_variant_assets_on_variant_id"
   end
 
   create_table "variants", force: :cascade do |t|
