@@ -3,6 +3,9 @@ class User < ActiveRecord::Base
   has_secure_password
 
   has_many :contacts, dependent: :destroy
+  has_many :orders, dependent: :destroy
+  has_many :payments, dependent: :destroy
+  has_many :shipments, dependent: :destroy
 
   validates :email, presence: true, uniqueness: { case_sensitive: false }
   validates :role, presence: true

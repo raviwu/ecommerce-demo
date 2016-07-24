@@ -6,6 +6,7 @@ RSpec.describe Order, type: :model do
   it { should belong_to(:user) }
   it { should belong_to(:currency) }
   it { should belong_to(:shipment) }
+  it { should have_many(:payments).dependent(:destroy) }
   it { should validate_presence_of(:order_number) }
   it { should validate_uniqueness_of(:order_number) }
   it { should validate_presence_of(:user) }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160724050158) do
+ActiveRecord::Schema.define(version: 20160724072344) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -62,6 +62,22 @@ ActiveRecord::Schema.define(version: 20160724050158) do
     t.index ["currency_id"], name: "index_orders_on_currency_id"
     t.index ["shipment_id"], name: "index_orders_on_shipment_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.string   "payment_number",             null: false
+    t.integer  "order_id",                   null: false
+    t.integer  "user_id",                    null: false
+    t.integer  "currency_id",                null: false
+    t.integer  "amount",         default: 0, null: false
+    t.string   "status",                     null: false
+    t.string   "payment_method",             null: false
+    t.datetime "paid_at"
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.index ["currency_id"], name: "index_payments_on_currency_id"
+    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["user_id"], name: "index_payments_on_user_id"
   end
 
   create_table "products", force: :cascade do |t|
