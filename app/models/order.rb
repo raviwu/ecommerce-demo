@@ -6,6 +6,7 @@ class Order < ActiveRecord::Base
   # User can have many payments for an order, keep
   # record the pass / failed attempts of payment history
   has_many :payments, dependent: :destroy
+  has_many :line_items, dependent: :destroy
 
   store :billing_contact_info, asseccors: [:attn_name, :email, :phone, :address, :zipcode], coder: JSON
   store :shipping_contact_info, asseccors: [:attn_name, :email, :phone, :address, :zipcode], coder: JSON

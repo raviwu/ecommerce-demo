@@ -15,6 +15,12 @@ class Variant < ActiveRecord::Base
 
   before_save :update_stock_item_count
 
+  def realtime_stock_item_count
+    self.stock_item_count = self.inventory_units.where(status: Settings.inventory.status.free).count
+    self.save
+    self.stock_item_count
+  end
+
   private
 
   def properties_conform_to_product
