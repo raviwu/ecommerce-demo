@@ -3,6 +3,8 @@ class LineItem < ActiveRecord::Base
   belongs_to :variant
   belongs_to :currency
 
+  has_many :inventory_units
+
   validates :order, presence: true
   validates :variant, presence: true
   validates :currency, presence: true

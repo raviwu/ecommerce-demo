@@ -10,6 +10,7 @@ RSpec.describe LineItem, type: :model do
   it { should belong_to(:order) }
   it { should belong_to(:variant) }
   it { should belong_to(:currency) }
+  it { should have_many(:inventory_units) }
   it { should validate_presence_of(:order) }
   it { should validate_presence_of(:variant) }
   it { should validate_presence_of(:currency) }
