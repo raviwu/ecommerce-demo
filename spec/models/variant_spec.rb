@@ -54,9 +54,9 @@ RSpec.describe Variant, type: :model do
     end
 
     it "counts the free to order inventory_units and cache to stock_item_count" do
-      create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
-      create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
-      create(:inventory_unit, variant: variant, status: Settings.inventory.status.lock)
+      (Settings.inventory.buffer_unit + 2).times do
+        create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
+      end
       variant.save
       expect(variant.stock_item_count).to eq(2)
     end

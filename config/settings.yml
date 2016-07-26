@@ -3,6 +3,7 @@ roles:
   admin: "Admin"
   customer: "Customer"
 inventory:
+  buffer_unit: 5
   status:
     free: "available"
     lock: "lock"

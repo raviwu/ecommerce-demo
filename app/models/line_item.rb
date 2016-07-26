@@ -36,10 +36,10 @@ class LineItem < ActiveRecord::Base
     updated_record_quantity = updated_record_attributes["quantity"]
     existed_record_quantity = reload.attributes["quantity"] if id.present?
 
-    if id.blank? && quantity > variant.realtime_stock_item_count
+    if id.blank? && quantity > InventoryManager.check_free_inventory_unit(variant)
       alert_inventory_shortage
     elsif existed_record_quantity.present? && updated_record_quantity > existed_record_quantity
-      alert_inventory_shortage if (updated_record_quantity - existed_record_quantity) > variant.realtime_stock_item_count
+      alert_inventory_shortage if (updated_record_quantity - existed_record_quantity) > InventoryManager.check_free_inventory_unit(variant)
     end
 
     assign_attributes(updated_record_attributes)
