@@ -66,7 +66,7 @@ RSpec.describe LineItem, type: :model do
       it "reserve the inventory units" do
         create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
         line_item = create(:line_item, variant: variant, quantity: 1, lock_inventory: true, unit_price: 10)
-        expect(InventoryManager.check_free_inventory_unit(variant)).to eq(1)
+        expect(InventoryManager.check_free_unit(variant)).to eq(1)
       end
 
       it "release inventory units if update quantity is lesser than previous quantity" do
@@ -75,7 +75,7 @@ RSpec.describe LineItem, type: :model do
         line_item = create(:line_item, variant: variant, quantity: 3, lock_inventory: true, unit_price: 10)
         line_item.quantity = 2
         line_item.save!
-        expect(InventoryManager.check_free_inventory_unit(variant)).to eq(1)
+        expect(InventoryManager.check_free_unit(variant)).to eq(1)
       end
 
       it "is invalid if inventory unit is not enough" do
@@ -91,9 +91,9 @@ RSpec.describe LineItem, type: :model do
       it "release all locked inventory units" do
         create(:inventory_unit, variant: variant, status: Settings.inventory.status.free)
         line_item = create(:line_item, variant: variant, quantity: 1, lock_inventory: true, unit_price: 10)
-        expect(InventoryManager.check_free_inventory_unit(variant)).to eq(1)
+        expect(InventoryManager.check_free_unit(variant)).to eq(1)
         line_item.destroy
-        expect(InventoryManager.check_free_inventory_unit(variant)).to eq(2)
+        expect(InventoryManager.check_free_unit(variant)).to eq(2)
       end
     end
   end

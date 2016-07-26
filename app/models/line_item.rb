@@ -36,10 +36,10 @@ class LineItem < ActiveRecord::Base
     updated_record_quantity = updated_record_attributes["quantity"]
     existed_record_quantity = reload.attributes["quantity"] if id.present?
 
-    if id.blank? && quantity > InventoryManager.check_free_inventory_unit(variant)
+    if id.blank? && quantity > InventoryManager.check_free_unit(variant)
       alert_inventory_shortage
     elsif existed_record_quantity.present? && updated_record_quantity > existed_record_quantity
-      alert_inventory_shortage if (updated_record_quantity - existed_record_quantity) > InventoryManager.check_free_inventory_unit(variant)
+      alert_inventory_shortage if (updated_record_quantity - existed_record_quantity) > InventoryManager.check_free_unit(variant)
     end
 
     assign_attributes(updated_record_attributes)
@@ -86,9 +86,6 @@ class LineItem < ActiveRecord::Base
 
   def release_inventory_unit
     return unless lock_inventory
-    quantity.times do |n|
-      variant.inventory_units.first.update(status: Settings.inventory.status.free)
-    end
-    variant.save #update cache
+    InventoryManager.release_unit(variant: variant, quantity: quantity)
   end
 end

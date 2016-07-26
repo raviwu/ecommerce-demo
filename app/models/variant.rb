@@ -27,6 +27,6 @@ class Variant < ActiveRecord::Base
   end
 
   def update_stock_item_count
-    self.stock_item_count = InventoryManager.check_free_inventory_unit(self)
+    self.stock_item_count = InventoryManager.check_free_unit(self)
   end
 end
