@@ -8,6 +8,9 @@ class Order < ActiveRecord::Base
   has_many :payments, dependent: :destroy
   has_many :line_items, dependent: :destroy
 
+  has_many :orders_promotions, dependent: :destroy
+  has_many :promotions, through: :orders_promotions
+
   store :billing_contact_info, asseccors: [:attn_name, :email, :phone, :address, :zipcode], coder: JSON
   store :shipping_contact_info, asseccors: [:attn_name, :email, :phone, :address, :zipcode], coder: JSON
 

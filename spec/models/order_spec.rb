@@ -8,6 +8,8 @@ RSpec.describe Order, type: :model do
   it { should belong_to(:shipment) }
   it { should have_many(:payments).dependent(:destroy) }
   it { should have_many(:line_items).dependent(:destroy) }
+  it { should have_many(:orders_promotions).dependent(:destroy) }
+  it { should have_many(:promotions) }
   it { should validate_presence_of(:order_number) }
   it { should validate_uniqueness_of(:order_number) }
   it { should validate_presence_of(:user) }
