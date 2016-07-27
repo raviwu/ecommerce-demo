@@ -15,7 +15,8 @@ class LineItem < ActiveRecord::Base
 
   validate :check_inventory_unit
 
-  before_save :calculate_line_item_total, :reserve_inventory_unit
+  before_save :calculate_line_item_total
+  after_save :reserve_inventory_unit # already validates inventory_units
   before_destroy :release_inventory_unit
 
   private
@@ -31,18 +32,20 @@ class LineItem < ActiveRecord::Base
     return unless lock_inventory
     return false if quantity.nil? || variant.nil?
 
-    updated_record_attributes = attributes
+    if id.blank? # new record
+      alert_inventory_shortage unless InventoryManager.can_reserve?(variant: variant, quantity: quantity)
+    else
+      updated_record_attributes = attributes
 
-    updated_record_quantity = updated_record_attributes["quantity"]
-    existed_record_quantity = reload.attributes["quantity"] if id.present?
+      updated_quantity = updated_record_attributes["quantity"]
+      existed_quantity = reload.attributes["quantity"]
 
-    if id.blank? && quantity > InventoryManager.check_free_unit(variant)
-      alert_inventory_shortage
-    elsif existed_record_quantity.present? && updated_record_quantity > existed_record_quantity
-      alert_inventory_shortage if (updated_record_quantity - existed_record_quantity) > InventoryManager.check_free_unit(variant)
+      increase_quantity = updated_quantity - existed_quantity
+
+      alert_inventory_shortage if increase_quantity > 0 && !InventoryManager.can_reserve?(variant: variant, quantity: increase_quantity)
+
+      assign_attributes(updated_record_attributes)
     end
-
-    assign_attributes(updated_record_attributes)
   end
 
   def alert_inventory_shortage
@@ -51,41 +54,12 @@ class LineItem < ActiveRecord::Base
 
   def reserve_inventory_unit
     return unless lock_inventory
-    if id.blank?
-      check_inventory_unit
-
-      if valid?
-        reserved_inventory_units = variant.inventory_units.where(status: Settings.inventory.status.free).limit(quantity)
-        reserved_inventory_units.update_all(status: Settings.inventory.status.lock)
-        variant.save #update cache
-      end
-    else
-      updated_record_attributes = attributes
-      updated_record_quantity = updated_record_attributes["quantity"]
-      existed_record_quantity = reload.attributes["quantity"]
-
-      if updated_record_quantity > existed_record_quantity
-        check_inventory_unit
-
-        if updated_record.valid?
-          reserved_inventory_units = variant.inventory_units.where(status: Settings.inventory.status.free).limit(updated_record_quantity - existed_record_quantity)
-          reserved_inventory_units.update_all(status: Settings.inventory.status.lock)
-          variant.save #update cache
-        end
-      elsif updated_record_quantity < existed_record_quantity
-        release_units_quantity = existed_record_quantity - updated_record_quantity
-        release_units_quantity.times do |n|
-          variant.inventory_units.first.update(status: Settings.inventory.status.free)
-        end
-        variant.save #update cache
-      end
-
-      self.assign_attributes(updated_record_attributes)
-    end
+    check_inventory_unit
+    InventoryManager.reserve_unit(line_item: self) if valid?
   end
 
   def release_inventory_unit
     return unless lock_inventory
-    InventoryManager.release_unit(variant: variant, quantity: quantity)
+    InventoryManager.release_unit(line_item: self)
   end
 end
