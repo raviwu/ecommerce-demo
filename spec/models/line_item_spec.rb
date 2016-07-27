@@ -107,7 +107,7 @@ RSpec.describe LineItem, type: :model do
     it "discounts when total meets available promotions with no discount on remainer" do
       promotion = create(
         :line_item_promotion,
-        description: "相同商品滿 3000 折 300",
+        description: "相同規格商品滿 3000 折 300",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_total: 300000,
@@ -118,12 +118,14 @@ RSpec.describe LineItem, type: :model do
       line_item.calculate_promo_total
       expect(line_item.promo_total).to eq(370000)
       expect(line_item.reload.promotions).to include(promotion)
+      expect(line_item.line_items_promotions.last.discount_amount).to \
+        eq(line_item.line_item_total - line_item.promo_total)
     end
 
     it "discounts when total meets available promotions with discount on total" do
       promotion = create(
         :line_item_promotion,
-        description: "相同商品滿 888 打 85 折",
+        description: "相同規格商品滿 888 打 85 折",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_total: 88800,
@@ -134,12 +136,14 @@ RSpec.describe LineItem, type: :model do
       line_item.calculate_promo_total
       expect(line_item.promo_total).to eq((400000 * 0.85).floor)
       expect(line_item.promotions).to include(promotion)
+      expect(line_item.line_items_promotions.last.discount_amount).to \
+        eq(line_item.line_item_total - line_item.promo_total)
     end
 
     it "discount when quantity meets available promotions" do
       promotion = create(
         :line_item_promotion,
-        description: "特定商品每三件打 77 折",
+        description: "特定規格商品每三件打 77 折",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_quantity: 3,
@@ -155,6 +159,8 @@ RSpec.describe LineItem, type: :model do
       line_item.calculate_promo_total
       expect(line_item_not_in_discount_variant.promo_total).to be_nil
       expect(line_item_not_in_discount_variant.promotions).not_to include(promotion)
+      expect(line_item.line_items_promotions.last.discount_amount).to \
+        eq(line_item.line_item_total - line_item.promo_total)
     end
   end
 end

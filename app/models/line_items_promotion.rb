@@ -4,4 +4,5 @@ class LineItemsPromotion < ActiveRecord::Base
 
   validates :line_item, presence: true
   validates :promotion, presence: true
+  validates :discount_amount, presence: true
 end

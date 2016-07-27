@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160727061153) do
+ActiveRecord::Schema.define(version: 20160727214515) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -72,8 +72,9 @@ ActiveRecord::Schema.define(version: 20160727061153) do
   end
 
   create_table "line_items_promotions", force: :cascade do |t|
-    t.integer "line_item_id", null: false
-    t.integer "promotion_id", null: false
+    t.integer "line_item_id",    null: false
+    t.integer "promotion_id",    null: false
+    t.integer "discount_amount"
     t.index ["line_item_id"], name: "index_line_items_promotions_on_line_item_id"
     t.index ["promotion_id"], name: "index_line_items_promotions_on_promotion_id"
   end

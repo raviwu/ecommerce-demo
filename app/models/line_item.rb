@@ -38,7 +38,7 @@ class LineItem < ActiveRecord::Base
       promotion_applied_result = promotion_applied_result.min_by(&:last)
       self.promo_total = promotion_applied_result&.last
 
-      LineItemsPromotion.create(line_item_id: id, promotion_id: promotion_applied_result&.first)
+      LineItemsPromotion.create(line_item_id: id, promotion_id: promotion_applied_result&.first, discount_amount: line_item_total - promo_total)
     end
 
     save!
