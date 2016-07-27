@@ -27,18 +27,12 @@ class LineItem < ActiveRecord::Base
     return unless Promotion.active_line_item_promotions.present?
     lock!
 
-    promotion_applied_result =
-      Promotion.active_line_item_promotions.map do |promotion|
-        promo_total = promotion.calculate_promo_total_of(self)
-        next unless promo_total.present?
-        [promotion.id, promo_total]
-      end
+    promotion_applied_result = Promotion.assign_promotion_to_line_item(self)
 
     if promotion_applied_result.present?
-      promotion_applied_result = promotion_applied_result.min_by(&:last)
-      self.promo_total = promotion_applied_result&.last
+      LineItemsPromotion.create(line_item_id: id, promotion_id: promotion_applied_result&.first, discount_amount: promotion_applied_result&.last)
 
-      LineItemsPromotion.create(line_item_id: id, promotion_id: promotion_applied_result&.first, discount_amount: line_item_total - promo_total)
+      self.promo_total = line_item_total - promotion_applied_result&.last
     end
 
     save!

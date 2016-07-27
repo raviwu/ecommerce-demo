@@ -2,6 +2,9 @@ class Promotion < ActiveRecord::Base
   scope :active_order_promotions, -> { where(
       'start_at <= ? AND expire_at >= ? AND scope = ?', Time.current, Time.current, Order.to_s
     ) }
+  scope :active_product_promotions, -> { where(
+      'start_at <= ? AND expire_at >= ? AND scope = ?', Time.current, Time.current, Product.to_s
+    ) }
   scope :active_line_item_promotions, -> { where(
       'start_at <= ? AND expire_at >= ? AND scope = ?', Time.current, Time.current, LineItem.to_s
     ) }
@@ -34,6 +37,8 @@ class Promotion < ActiveRecord::Base
         discount_rate: "Float",
         included_variant_ids: "Array",
         excluded_variant_ids: "Array",
+        included_product_ids: "Array",
+        excluded_product_ids: "Array",
         discount_on_remainer: "Boolean",
       },
     discount_on_total_when_quantity_meets_requirement:
@@ -43,6 +48,8 @@ class Promotion < ActiveRecord::Base
         discount_rate: "Float",
         included_variant_ids: "Array",
         excluded_variant_ids: "Array",
+        included_product_ids: "Array",
+        excluded_product_ids: "Array",
         discount_on_remainer: "Boolean",
       }
   }
@@ -66,24 +73,30 @@ class Promotion < ActiveRecord::Base
     rule[:require_quantity].present?
   end
 
-  def calculate_promo_total_of(line_item, options = {})
+  def calculate_line_item_promo_total_of(line_item, options = {})
     return nil unless is_line_item_promotable?(line_item)
 
     total_count_base = line_item.calculate_line_item_total
 
-    if is_discount_by_total? && rule[:discount_on_remainer]
-      total_count_base * rule[:discount_rate]
+    if rule[:discount_on_remainer]
+      total_count_base - (total_count_base * rule[:discount_rate])
     elsif is_discount_by_total? && !rule[:discount_on_remainer]
       deduct_count = total_count_base / rule[:require_total]
-      remainer = total_count_base % rule[:require_total]
-      (deduct_count * rule[:require_total] * rule[:discount_rate]) + remainer
-    elsif is_discount_by_quantity? && rule[:discount_on_remainer]
-      total_count_base * rule[:discount_rate]
+      deduct_count * rule[:require_total] * (1 - rule[:discount_rate])
     elsif is_discount_by_quantity? && !rule[:discount_on_remainer]
       deduct_count = line_item.quantity / rule[:require_quantity]
-      remainer_count = line_item.quantity % rule[:require_quantity]
-      discount_price = line_item.unit_price * rule[:discount_rate]
-      (deduct_count * rule[:require_quantity] * discount_price) + (remainer_count * line_item.unit_price)
+      deduct_count * rule[:require_quantity] * line_item.unit_price * (1 - rule[:discount_rate])
     end
+  end
+
+  def self.assign_promotion_to_line_item(line_item)
+    promotion_applied_result =
+      active_line_item_promotions.map do |promotion|
+        discount_amount = promotion.calculate_line_item_promo_total_of(line_item).ceil
+        next unless discount_amount.present?
+        [promotion.id, discount_amount]
+      end
+    # Assign only one promotion to LineItem with highest discount_amount
+    promotion_applied_result.max_by(&:last)
   end
 end
