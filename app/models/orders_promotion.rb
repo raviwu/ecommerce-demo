@@ -4,4 +4,5 @@ class OrdersPromotion < ActiveRecord::Base
 
   validates :order, presence: true
   validates :promotion, presence: true
+  validates :discount_amount, presence: true
 end

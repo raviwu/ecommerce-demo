@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160727214515) do
+ActiveRecord::Schema.define(version: 20160727225557) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -98,8 +98,9 @@ ActiveRecord::Schema.define(version: 20160727214515) do
   end
 
   create_table "orders_promotions", force: :cascade do |t|
-    t.integer "order_id",     null: false
-    t.integer "promotion_id", null: false
+    t.integer "order_id",        null: false
+    t.integer "promotion_id",    null: false
+    t.integer "discount_amount"
     t.index ["order_id"], name: "index_orders_promotions_on_order_id"
     t.index ["promotion_id"], name: "index_orders_promotions_on_promotion_id"
   end
