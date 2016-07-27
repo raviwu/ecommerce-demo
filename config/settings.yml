@@ -26,6 +26,7 @@ promotion:
   scope:
     all: ["Order", "LineItem"]
     order: "Order"
+    product: "Product"
     line_item: "LineItem"
 payment:
   method:
