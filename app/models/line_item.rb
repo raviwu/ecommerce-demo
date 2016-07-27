@@ -16,7 +16,7 @@ class LineItem < ActiveRecord::Base
   validate :check_inventory_unit
 
   before_save :calculate_line_item_total
-  after_save :reserve_inventory_unit # already validates inventory_units
+  after_save :update_inventory_unit_reservation # already validates inventory_units
   before_destroy :release_inventory_unit
 
   private
@@ -52,10 +52,10 @@ class LineItem < ActiveRecord::Base
     errors.add(:quantity, "cannot exceed inventory quantity: #{variant.stock_item_count}")
   end
 
-  def reserve_inventory_unit
+  def update_inventory_unit_reservation
     return unless lock_inventory
     check_inventory_unit
-    InventoryManager.reserve_unit(line_item: self) if valid?
+    InventoryManager.update_reservation(line_item: self) if valid?
   end
 
   def release_inventory_unit

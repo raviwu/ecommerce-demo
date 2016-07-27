@@ -13,7 +13,7 @@ class InventoryManager
     self.check_free_unit(variant) >= quantity
   end
 
-  def self.reserve_unit(options = {})
+  def self.update_reservation(options = {})
     line_item = self.check_line_item_input(options)
     quantity =
       if options[:quantity].present?
