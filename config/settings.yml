@@ -22,6 +22,11 @@ order:
     packing: "包裝中"
     delivered: "已寄出"
     received: "已送達"
+promotion:
+  scope:
+    all: ["Order", "LineItem"]
+    order: "Order"
+    line_item: "LineItem"
 payment:
   method:
     credit_card: "Credit Card"
