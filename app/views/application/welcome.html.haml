@@ -11,11 +11,36 @@
 %h2 Accompished Task Description:
 %ul
   %li 測試覆蓋度：因為時間有限所以 RSpec 測試只覆蓋 model 部分。
-  %li 實作時間：確定 Schema 圖，實作 Rails APP，到目前的成果，大概 12 小時左右。
+  %li
+    實作時間：
+    %ul
+      %li 確定 Schema 圖，實作 Rails APP，Model 主架構，大概 12 小時左右。
+      %li 重構庫存管理機制、新增折扣系統實作 DEMO，大概 5 小時。
   %li
     小分享：在很多表格用 belongs_to 的時候都會被強制 Validation Failed，查了好一陣子發現是 Rails 5 預設 belongs_to 會去檢查 parent object not null。如果可以接受空值要另外加上
     %code belongs_to :shipment, optional: true
     去躲掉 Validation，大概卡了一小時。 QQ
+  %li
+    %mark 慣用但 Demo 沒使用，如果要繼續發展會使用的 Gem：
+    %ul
+      %li
+        使用者登入與第三方登入：
+        Devise
+        配合
+        =link_to "TL;DR", "https://github.com/lynndylanhurley/devise_token_auth"
+      %li
+        權限管理：
+        =link_to "Pundit", "https://github.com/elabs/pundit"
+        或是
+        =link_to "cancancan", "https://github.com/CanCanCommunity/cancancan"
+        。
+        目前沒有真的實作過很完整的權限管理，所以這兩個 Gem 都是可能會採用的方案。
+      %li
+        金流如果沒有要特別去自己接服務的話，會考慮用
+        =link_to "Active Merchant", "https://github.com/activemerchant/active_merchant"
+        。
+      %li
+        Search with ElasticSearch
   %li
     使用者相關：
     %ul
@@ -34,24 +59,47 @@
       %li 產品大項說明可以放在 Product 裡，詳細的規格差異，例如顏色、衣服尺碼、頻寬容量等，可以改放在 Variant 裡。
       %li Variant 掛了 paperclip 的附件，可以新增多媒體說明內容。
       %li Variant 商品屬性必須要對應 Product 有列出來的有效值，Custom Validation 檢查寫在 Variant Model。
+      %li
+        %mark stock_item_count 欄位的設計目的：
+        Variant 有個
+        %code before_save :update_stock_item_count
+        是用來讓 InventoryManager 操作時可以用
+        %mark variant.save
+        去同步 cache 該 Variant 的庫存狀態，這樣 FrontEnd 的 View 可以不用每次都去計算 InventoryUnit 的數目，只需要讀取 variant 記錄裡的暫存欄位就可以。
   %li
     訂單相關設計：
     %ul
       %li 購物車，使用「購物中」狀態的訂單
       %li LineItem 從 Variant 中複製資料，記錄購買當下的價格。
       %li LineItem 設定是否需要確保庫存預留，若 lock_inventory 設為 true 則有 Custome Validation 確保庫存不夠的商品不會被新增 LineItem 。
-      %li LintItem 更新或是刪除的時候會釋出不再需要保留的 InventoryUnit ，採用 Callback 的做法寫在 Model 裡，這部分牽涉到跨 Model 的操作，有機會的話再抽出來做成獨立的 Service 可能會好些。
+      %li
+        %mark LintItem 更新或是刪除的時候會釋出不再需要保留的 InventoryUnit ，用 InventoryManager 做跨 model 操作。
       %li 多筆 Order 可以併成一張 Shipment。
       %li 單筆 Order 可以有多次嘗試的 Payment。Payment 成功的應該只要有一筆。（尚未寫到 before_create 的時候去確認是否已經有付款成功的記錄來擋）
       %li 拆開 Payment / Order / Invoice，讓會計自由度高一點。
   %li
-    折扣機制相關設計：時間不太夠琢磨這邊的功能，想來想去都還沒有能夠簡單解決想做的 feature，這兩天再繼續想想有沒有好的方式可以實作，如果有更新我再把更新的 APP 寄給你們。主要的思路是：
+    %mark 庫存相關設計改良：
     %ul
-      %li Promotion 獨立一張表格，記錄 start_on / expire_on。
-      %li 每個紀錄都有自己的 scope 並透過 many-to-many 的方式跟 order / line_item 做連結。
-      %li 針對 LineItem 本身做折扣，記錄在 LintItem 的 promo_total 上，例如特定商品買幾件以後就可以折多少。
-      %li 針對整張 Order 做折扣，記錄在 Order 的 promo_total 上，例如買千送百之類的活動。
-      %li 在有效期間只要符合 Promotion 規則的 LineItem 或 Order，在選定幾個檢查時機下去更新 promo_total，before_create / before_save 之類的。
+      %li 新增一個 buffer_unit 的設計，可以設定不會被 reserved 的最低緩衝庫存數量。
+      %li 改用 InventoryManager 去做跨 model 的操作。
+      %li 在 InventoryManager 中針對 Inventory 表做 transaction 以確保資料正確性。
+      %li 新增 line_item_id 關聯方便庫存計算。
+  %li
+    %mark 折扣系統實作：
+    %ul
+      %li 可以分別針對「特定規格商品 Variant」、「特定商品 Product」、「整張訂單 Order」三個 Scope 去設定折扣規則。
+      %li 折扣計算則是使用 many-to-many 的方式單獨與不同 scope 的 object 做連結，折扣價格記錄在 LineItemsPromotion 或是 OrdersPromotion 中。
+      %li Promotion 的規則統一於 Promotion model 裡，使用 JSON 格式存於 rule 欄位增加自由度，model 需要再加上一些 format check 來確保 rule 的格式正確。
+      %li
+        Order 在完成過後可以呼叫
+        %code calculate_promo_total
+        針對整張訂單適用的所有 Promotion 做篩選與運算，目前規則是，如果有全訂單範圍的 Promotion 就先試用，其中若有被排除的商品或者是未計入折扣的商品，再依序去翻找 Product 範圍的 Promotion，Variant 範圍的 Promotion 則是當該項 line_item 從未被納入其他 Promotion 折扣中時才會建立。
+      %li
+        所有的 OrdersPromotion / LineItemsPromotion 都是在
+        %code order.calculate_promo_total
+        的時候才會分別建立被納入的 Promotion，最終計算
+        %code promo_total
+        的時候是去撈出所有適用在這張訂單的 OrdersPromotion / LineItemsPromotion 做折算。
   %li
     介面相關 DEMO：
     %ul
