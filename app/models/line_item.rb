@@ -5,12 +5,16 @@ class LineItem < ActiveRecord::Base
 
   has_many :inventory_units
 
+  has_many :line_items_promotions, dependent: :destroy
+  has_many :promotions, through: :line_items_promotions
+
   validates :order, presence: true
   validates :variant, presence: true
   validates :currency, presence: true
   validates :unit_price, presence: true
   validates :quantity, presence: true
-  validates :lock_inventory, presence: true
+  validates :lock_inventory, inclusion: { in: [true, false] }
+  validates :lock_inventory, exclusion: { in: [nil] }
   validates :line_item_total, presence: true
 
   validate :check_inventory_unit
@@ -19,7 +23,20 @@ class LineItem < ActiveRecord::Base
   after_save :update_inventory_unit_reservation # already validates inventory_units
   before_destroy :release_inventory_unit
 
-  private
+  def calculate_promo_total
+    return unless Promotion.active_line_item_promotions.present?
+    lock!
+
+    promotion_applied_result = Promotion.assign_promotion_to_line_item(self)
+
+    if promotion_applied_result.present?
+      LineItemsPromotion.create(line_item_id: id, promotion_id: promotion_applied_result&.first, discount_amount: promotion_applied_result&.last)
+
+      self.promo_total = line_item_total - promotion_applied_result&.last
+    end
+
+    save!
+  end
 
   def calculate_line_item_total
     self.unit_price = unit_price || 0
@@ -28,9 +45,11 @@ class LineItem < ActiveRecord::Base
     self.line_item_total = unit_price * quantity
   end
 
+  private
+
   def check_inventory_unit
     return unless lock_inventory
-    return false if quantity.nil? || variant.nil?
+    return if quantity.nil? || variant.nil?
 
     if id.blank? # new record
       alert_inventory_shortage unless InventoryManager.can_reserve?(variant: variant, quantity: quantity)
