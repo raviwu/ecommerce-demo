@@ -107,7 +107,7 @@ RSpec.describe LineItem, type: :model do
     it "discounts when total meets available promotions with no discount on remainer" do
       promotion = create(
         :line_item_promotion,
-        description: "相同規格商品滿 3000 折 300",
+        description: "Discount $300 for same spec product every #3000",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_total: 300000,
@@ -125,7 +125,7 @@ RSpec.describe LineItem, type: :model do
     it "discounts when total meets available promotions with discount on total" do
       promotion = create(
         :line_item_promotion,
-        description: "相同規格商品滿 888 打 85 折",
+        description: "15% off for same spec product if the total more than 888",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_total: 88800,
@@ -143,7 +143,7 @@ RSpec.describe LineItem, type: :model do
     it "discount when quantity meets available promotions" do
       promotion = create(
         :line_item_promotion,
-        description: "特定規格商品每三件打 77 折",
+        description: "23% off for every three same spec products",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           require_quantity: 3,

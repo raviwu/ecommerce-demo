@@ -59,7 +59,7 @@ RSpec.describe Order, type: :model do
     it "discounts when total meets available promotions with discount on total" do
       product_promotion = create(
         :product_promotion,
-        description: "相同商品滿 888 打 85 折",
+        description: "15% off for same spec product if the total more than 888",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           excluded_product_ids: [product.id],
@@ -70,7 +70,7 @@ RSpec.describe Order, type: :model do
       )
       order_promotion = create(
         :order_promotion,
-        description: "滿 199 打 8 折（部分商品除外）",
+        description: "20% off if the order total more than 199 (Some product excluded)",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           excluded_product_ids: [product.id],
@@ -89,7 +89,7 @@ RSpec.describe Order, type: :model do
     it "discount when quantity meets available promotions" do
       product_promotion = create(
         :product_promotion,
-        description: "特定商品每三件打 77 折",
+        description: "23% off for every three same spec products",
         rule: {
           type: :discount_on_total_when_total_meets_requirement,
           included_product_ids: [product.id],

@@ -34,26 +34,30 @@ demo_user = User.find_by_email("customer@ecommerce.demo") || User.new(
 
 demo_user.save if demo_user.valid?
 
-currency = Currency.find_by_name("NTD") || Currency.create(name: "NTD", symbol: "$")
+currency = Currency.find_by_name("NTD") || Currency.create(name: "USD", symbol: "$")
 
 classification = Classification.find_by_name("Phone Card") || Classification.create(name: "Phone Card", description: "Prepaid phone SIM card.")
 
 product = Product.find_by_name("AT&T 4G Phone Card") || Product.create(
-  name: "AT&T 4G Phone Card",
-  description: "☆ AT&T預付卡(美國手機門號)，享用美國當地話費，以及手機在美國上網！/n☆ 美國AT&T是全球最大的電信公司，在美國有最大的訊號範圍/n☆ 已開卡，到達美國後，將美國SIM卡插入台灣三頻手機，即可立即使用!/n☆ 限掛寄出免運費，上班日13:00前付款當天寄出，最快隔日即可收到  急用請參考/n☆ 免費 iPhone 剪卡服務，限可通話的手機使用；平板電腦/iPad/行動分享器無法使用",
+  name: "Kindle E-readers",
+  description: "The best devices for reading, period.",
   properties: {
-    color: %w(red black yellow),
-    bandwidth: %w(1G 3G 5G)
+    connection: %w(3G WiFi),
+    version: %w(addon addfree),
+    model: %W(kindle paperwhite voyage oasis),
+    color: %W(black white)
   },
   available_on: Time.current,
   classification: classification
 )
 
 variant = Variant.first || Variant.create(
-  price: 10000,
+  price: 7999,
   properties: {
-    color: "red",
-    bandwidth: "5G"
+    connection: "WiFi",
+    version: "addon",
+    model: "kindle",
+    color: "black"
   },
   currency: currency,
   product: product
@@ -64,10 +68,12 @@ variant_2 =
     Variant.last
   elsif Variant.count == 1
     Variant.create(
-      price: 10000,
+      price: 9999,
       properties: {
-        color: "red",
-        bandwidth: "5G"
+        connection: "WiFi",
+        version: "addfree",
+        model: "kindle",
+        color: "black"
       },
       currency: currency,
       product: product
@@ -92,28 +98,28 @@ order_1 = Order.create!(
     address: "Some where in Taiwan",
     zipcode: "220"
   },
-  line_item_total: 25000,
-  promo_total: 24000,
-  status: "待付款",
+  line_item_total: 25997,
+  promo_total: 25997,
+  status: Settings.order.status.payment_pending,
   currency: currency,
   user: demo_user
 )
 
 LineItem.create(
-  unit_price: 10000,
+  unit_price: 7999,
   quantity: 2,
   lock_inventory: false,
-  line_item_total: 20000,
+  line_item_total: 15998,
   variant: variant,
   currency: currency,
   order: order_1
 )
 
 LineItem.create(
-  unit_price: 5000,
+  unit_price: 9999,
   quantity: 1,
   lock_inventory: false,
-  line_item_total: 5000,
+  line_item_total: 9999,
   variant: variant_2,
   currency: currency,
   order: order_1
@@ -139,7 +145,7 @@ order_2 = Order.create!(
   },
   line_item_total: 0,
   promo_total: 0,
-  status: "購物中",
+  status: Settings.order.status.shopping,
   currency: currency,
   user: demo_user
 )

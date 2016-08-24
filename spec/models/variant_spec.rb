@@ -37,6 +37,7 @@ RSpec.describe Variant, type: :model do
     it "is valid if the variant properties use valid values" do
       variant = build(
         :variant,
+        product: product,
         properties: {
           color: "red",
           bandwidth: "5G"
