@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160724080233) do
+ActiveRecord::Schema.define(version: 20160727225557) do
 
   create_table "classifications", force: :cascade do |t|
     t.string   "name",        null: false
@@ -39,10 +39,11 @@ ActiveRecord::Schema.define(version: 20160724080233) do
   end
 
   create_table "inventory_units", force: :cascade do |t|
-    t.string   "status",     default: "available", null: false
-    t.integer  "variant_id",                       null: false
-    t.datetime "created_at",                       null: false
-    t.datetime "updated_at",                       null: false
+    t.string   "status",       default: "available", null: false
+    t.integer  "variant_id",                         null: false
+    t.datetime "created_at",                         null: false
+    t.datetime "updated_at",                         null: false
+    t.integer  "line_item_id"
     t.index ["variant_id"], name: "index_inventory_units_on_variant_id"
   end
 
@@ -70,6 +71,14 @@ ActiveRecord::Schema.define(version: 20160724080233) do
     t.index ["variant_id"], name: "index_line_items_on_variant_id"
   end
 
+  create_table "line_items_promotions", force: :cascade do |t|
+    t.integer "line_item_id",    null: false
+    t.integer "promotion_id",    null: false
+    t.integer "discount_amount"
+    t.index ["line_item_id"], name: "index_line_items_promotions_on_line_item_id"
+    t.index ["promotion_id"], name: "index_line_items_promotions_on_promotion_id"
+  end
+
   create_table "orders", force: :cascade do |t|
     t.string   "order_number",                      null: false
     t.integer  "user_id",                           null: false
@@ -86,6 +95,14 @@ ActiveRecord::Schema.define(version: 20160724080233) do
     t.index ["currency_id"], name: "index_orders_on_currency_id"
     t.index ["shipment_id"], name: "index_orders_on_shipment_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
+  create_table "orders_promotions", force: :cascade do |t|
+    t.integer "order_id",        null: false
+    t.integer "promotion_id",    null: false
+    t.integer "discount_amount"
+    t.index ["order_id"], name: "index_orders_promotions_on_order_id"
+    t.index ["promotion_id"], name: "index_orders_promotions_on_promotion_id"
   end
 
   create_table "payments", force: :cascade do |t|
@@ -114,6 +131,17 @@ ActiveRecord::Schema.define(version: 20160724080233) do
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
     t.index ["classification_id"], name: "index_products_on_classification_id"
+  end
+
+  create_table "promotions", force: :cascade do |t|
+    t.string   "scope",                       null: false
+    t.string   "description",                 null: false
+    t.text     "rule",                        null: false
+    t.datetime "start_at",                    null: false
+    t.datetime "expire_at",                   null: false
+    t.boolean  "active",      default: false, null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
   end
 
   create_table "roles", force: :cascade do |t|

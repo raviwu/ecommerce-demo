@@ -3,8 +3,10 @@ FactoryGirl.define do
     price 10000
     properties {
       {
-        color: "red",
-        bandwidth: "5G"
+        connection: "WiFi",
+        version: "addon",
+        model: "kindle",
+        color: "black"
       }
     }
 

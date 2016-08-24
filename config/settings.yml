@@ -3,24 +3,31 @@ roles:
   admin: "Admin"
   customer: "Customer"
 inventory:
+  buffer_unit: 5
   status:
     free: "available"
     lock: "lock"
 shipment:
   status:
-    packing: "包裝"
-    delivered: "寄出"
-    received: "已收貨"
+    packing: "packing"
+    delivered: "delivered"
+    received: "received"
   method:
-    post: "郵局便利袋"
-    fami_port: "全家超商取貨"
+    post: "post"
+    fami_port: "fami_port"
 order:
   status:
-    shopping: "購物中"
-    payment_pending: "待付款"
-    packing: "包裝中"
-    delivered: "已寄出"
-    received: "已送達"
+    shopping: "shopping"
+    payment_pending: "payment_pending"
+    packing: "packing"
+    delivered: "delivered"
+    received: "received"
+promotion:
+  scope:
+    all: ["Order", "LineItem"]
+    order: "Order"
+    product: "Product"
+    line_item: "LineItem"
 payment:
   method:
     credit_card: "Credit Card"

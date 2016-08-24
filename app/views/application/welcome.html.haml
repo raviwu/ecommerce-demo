@@ -1,59 +1,94 @@
-%h2 Task Description:
-%p 請架設一個可以為客戶建立訂單的網站，介面只需要給工作人員使用的後台部份。
-%ol
-  %li 網站上可以設定多個商品（商品名稱、價格、介紹等爛位）
-  %li 每筆訂單有客戶的基本聯絡資訊（姓名、電話、email、地址) 以及客戶購買的所有項目
-  %li
-    同時希望可以針對客戶購買的商品數量設定折扣
-    例如： 特定商品買3件以上每件可折扣30元。
 %h2 Schema Design:
 = image_tag("ecommerce_schema.png", class: "img-fluid", alt: "Schema Graph", style: "max-width: 100%; height: auto;")
 %h2 Accompished Task Description:
 %ul
-  %li 測試覆蓋度：因為時間有限所以 RSpec 測試只覆蓋 model 部分。
-  %li 實作時間：確定 Schema 圖，實作 Rails APP，到目前的成果，大概 12 小時左右。
-  %li
-    小分享：在很多表格用 belongs_to 的時候都會被強制 Validation Failed，查了好一陣子發現是 Rails 5 預設 belongs_to 會去檢查 parent object not null。如果可以接受空值要另外加上
-    %code belongs_to :shipment, optional: true
-    去躲掉 Validation，大概卡了一小時。 QQ
-  %li
-    使用者相關：
+  %li TODOs:
     %ul
       %li
-        簡單用 bcrypt 採密碼登入。
+        User Management:
+        Devise
+        +
+        =link_to "TL;DR", "https://github.com/lynndylanhurley/devise_token_auth"
+      %li
+        Authentication:
+        =link_to "Pundit", "https://github.com/elabs/pundit"
+        OR
+        =link_to "cancancan", "https://github.com/CanCanCommunity/cancancan"
+      %li
+        Payment Integration:
+        =link_to "Active Merchant", "https://github.com/activemerchant/active_merchant"
+      %li
+        Search with ElasticSearch
+      %li
+        Single Order can has many payment record, failed or waiting, but the success payment should only be one.
+      %li
+        Promotion Rule Custom Validation.
+  %li
+    User Related Features:
+    %ul
+      %li
+        Use simple bcrypt Password login.
         %ul
           %li admin@ecommerce.demo / password
           %li customer@ecommerce.demo / password
-      %li 使用者可能會有不同的常用地址，用 Contact 來儲存「常用聯絡地址」。
-      %li 權限管理使用 Role 做管理。
-      %li 工作人員的後台系統限制 Admin Role 才可存取。
+      %li User might have several shipping address, use Contact to store the "contact addresses".
+      %li Use Role for authentication management.
+      %li Admin Panel requires Admin Role.
   %li
-    商品相關設計：
+    Product Related Features:
     %ul
-      %li 簡單用 Category 做主分類
-      %li 產品大項說明可以放在 Product 裡，詳細的規格差異，例如顏色、衣服尺碼、頻寬容量等，可以改放在 Variant 裡。
-      %li Variant 掛了 paperclip 的附件，可以新增多媒體說明內容。
-      %li Variant 商品屬性必須要對應 Product 有列出來的有效值，Custom Validation 檢查寫在 Variant Model。
+      %li Use Category for basic categorization.
+      %li Base Production Description is illustrated in Product, and the detailed SPEC are listed by Variant.
+      %li Variant has paperclip attachment to add multi-media description.
+      %li Variant attributes requires to match it's Product valid attributes, use Custom Validation in Variant Model.
+      %li
+        Design purpose of stock_item_count column in Variant:
+        Variant has a callback
+        %code before_save :update_stock_item_count
+        to let InventoryManager call
+        %mark variant.save
+        and cache that Variant inventory status, letting FrontEnd View to read this cache instead of calculating the InventoryUnit count, aim to reduce the query loading on DB.
   %li
-    訂單相關設計：
+    Order Related Features:
     %ul
-      %li 購物車，使用「購物中」狀態的訂單
-      %li LineItem 從 Variant 中複製資料，記錄購買當下的價格。
-      %li LineItem 設定是否需要確保庫存預留，若 lock_inventory 設為 true 則有 Custome Validation 確保庫存不夠的商品不會被新增 LineItem 。
-      %li LintItem 更新或是刪除的時候會釋出不再需要保留的 InventoryUnit ，採用 Callback 的做法寫在 Model 裡，這部分牽涉到跨 Model 的操作，有機會的話再抽出來做成獨立的 Service 可能會好些。
-      %li 多筆 Order 可以併成一張 Shipment。
-      %li 單筆 Order 可以有多次嘗試的 Payment。Payment 成功的應該只要有一筆。（尚未寫到 before_create 的時候去確認是否已經有付款成功的記錄來擋）
-      %li 拆開 Payment / Order / Invoice，讓會計自由度高一點。
+      %li Shopping Cart is the Order with stating "Shopping"
+      %li LineItem will copy data from Variant and record the "price" at that moment.
+      %li
+        LineItem can setup the inventory reservation, if
+        %code lock_inventory
+        is
+        %code true
+        , then Custom Validation will make sure only valid inventory will be added to LineItem.
+      %li LintItem update or destroy will release the unused InventoryUnit, use InventoryManager to proceed the cross model operation.
+      %li Multi Order records can be merged in single Shipment.
+      %li Single Order can has many payment record, failed or waiting, but the success payment should only be one.
+      %li Separate Payment / Order / Invoice to handle the accounting easily.
   %li
-    折扣機制相關設計：時間不太夠琢磨這邊的功能，想來想去都還沒有能夠簡單解決想做的 feature，這兩天再繼續想想有沒有好的方式可以實作，如果有更新我再把更新的 APP 寄給你們。主要的思路是：
+    Inventory Related Features:
     %ul
-      %li Promotion 獨立一張表格，記錄 start_on / expire_on。
-      %li 每個紀錄都有自己的 scope 並透過 many-to-many 的方式跟 order / line_item 做連結。
-      %li 針對 LineItem 本身做折扣，記錄在 LintItem 的 promo_total 上，例如特定商品買幾件以後就可以折多少。
-      %li 針對整張 Order 做折扣，記錄在 Order 的 promo_total 上，例如買千送百之類的活動。
-      %li 在有效期間只要符合 Promotion 規則的 LineItem 或 Order，在選定幾個檢查時機下去更新 promo_total，before_create / before_save 之類的。
+      %li Use buffer_unit in Settings to preserve the global mininum reserved quantity.
+      %li Use InventoryManager to handle cross model operations.
+      %li In InventoryManager, use Inventory table transaction to ensure the data consistency.
   %li
-    介面相關 DEMO：
+    Discount Related Features:
     %ul
-      %li 登入、登出
+      %li Use Scope to specify the descount rule on "assigned SPEC Variant", "assigned SPEC Product", or "Order".
+      %li
+        Discount result use many-to-many relations to associate LineItem and Order object, the discount price being recorded in LineItemsPromotion and OrdersPromotion records.
+      %li
+        Promotion role is defined within Promotion model with JSON format.
+      %li
+        After Order is finished, can call
+        %code calculate_promo_total
+        to calculate all the valid promotions the applies to the order, current rule is if "Order" scope promotion has highest prority, and same product will be count discount only once. (only those product has not being applied any promotions will being queried for promotions search)
+      %li
+        All OrdersPromotion / LineItemsPromotion records are created when
+        %code order.calculate_promo_total
+        And the final order
+        %code promo_total
+        is calculated based on the order's OrdersPromotion / LineItemsPromotion
+  %li
+    View DEMO：
+    %ul
+      %li Login / Logout
       %li Orders index / show
